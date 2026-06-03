@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.unregisterListener(this);
     }
 
-    // --- LÓGICA DE ALGORITMOS (Baches + Evasión) ---
+    // --- LÓGICA (Baches + Evasión) ---
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 enviarMqtt(fuerzaZ, "AUTOMATICO", "BACHE");
             }
 
-            // 2. DETECCIÓN DE MANIOBRA EVASIVA (Máquina de Estados)
+            // 2. DETECCIÓN DE MANIOBRA PELIGROSA O EVASIVA (Máquina de Estados)
             // Timeout de evasión: Si pasó mucho tiempo desde el primer volantazo, cancelamos.
             if (estadoEvasion == 1 && (tiempoActual - tiempoPrimerVolantazo > TIEMPO_MAX_REGRESO_MS)) {
                 estadoEvasion = 0;
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 else if (estadoEvasion == 1) {
                     // Estamos esperando el regreso. Verificamos si la dirección es contraria.
                     if (Math.signum(netX) != direccionPrimerVolantazo) {
-                        // ¡Regresó al carril a tiempo! Es un esquive.
+                        // Fue una maniobra peligrosa.
                         if (tiempoActual - ultimoEventoDetectadoTiempo > COOLDOWN_REDUNDANCIA_MS) {
                             ultimoEventoDetectadoTiempo = tiempoActual;
 
