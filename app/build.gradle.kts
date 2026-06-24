@@ -60,4 +60,6 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.1")
     // Libreria MQTT de Eclipse Paho
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 }
