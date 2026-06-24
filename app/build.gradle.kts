@@ -43,6 +43,21 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
-    // Librería MQTT de Eclipse Paho
+    // Material Design 3
+    implementation("com.google.android.material:material:1.12.0")
+    // Jetpack Core
+    implementation("androidx.core:core-ktx:1.13.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+    // ViewModel + LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.3")
+    // ViewPager2 + TabLayout
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    // Fragment KTX
+    implementation("androidx.fragment:fragment-ktx:1.8.1")
+    // Libreria MQTT de Eclipse Paho
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 }

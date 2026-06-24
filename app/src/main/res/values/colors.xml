@@ -1,5 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    colors.xml (res/values/colors.xml)
+    Paleta de colores del tema oscuro de PaveWatch App.
+    Basada en superficies oscuras escalonadas + ámbar como acento primario
+    (evoca señales viales y alertas de infraestructura).
+-->
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <!-- ================================================================
+         SUPERFICIES OSCURAS ESCALONADAS
+         Cada nivel de profundidad tiene su propio tono para dar
+         sensación de profundidad sin sombras pesadas.
+    ================================================================ -->
+    <!-- Fondo general de la aplicación -->
+    <color name="surface_dark">#0F1117</color>
+    <!-- Superficie de tarjetas y elementos elevados -->
+    <color name="surface_elevated">#1A1D27</color>
+    <!-- Superficie de elementos interactivos (botones, selects) -->
+    <color name="surface_interactive">#22263A</color>
+
+    <!-- ================================================================
+         ACENTO PRINCIPAL: ÁMBAR VIAL
+         Evoca señales de tráfico, alertas de infraestructura.
+         Contrasta fuertemente sobre fondos oscuros (#0F1117).
+    ================================================================ -->
+    <color name="accent_amber">#F59E0B</color>
+    <!-- Versión desaturada para fondos de íconos -->
+    <color name="accent_amber_dim">#251F0B</color>
+    <!-- Acento secundario: cian técnico (evoca telemetría/IoT) -->
+    <color name="accent_cyan">#22D3EE</color>
+    <color name="accent_cyan_dim">#0C1F25</color>
+
+    <!-- ================================================================
+         SEMÁNTICA DE ESTADO (chips MQTT)
+    ================================================================ -->
+    <!-- Enviado exitosamente a broker -->
+    <color name="status_sent">#065F46</color>
+    <color name="status_sent_text">#34D399</color>
+    <!-- Error de conexión o timeout -->
+    <color name="status_error">#7F1D1D</color>
+    <color name="status_error_text">#FCA5A5</color>
+    <!-- Pendiente / En cola -->
+    <color name="status_pending">#1E3A5F</color>
+    <color name="status_pending_text">#93C5FD</color>
+
+    <!-- ================================================================
+         TIPOGRAFÍA: JERARQUÍA DE TEXTO
+    ================================================================ -->
+    <!-- Texto principal: alta legibilidad sobre fondo oscuro -->
+    <color name="text_primary">#F1F5F9</color>
+    <!-- Texto secundario: metadatos, labels -->
+    <color name="text_secondary">#94A3B8</color>
+    <!-- Texto terciario: timestamps, hints, placeholders -->
+    <color name="text_tertiary">#475569</color>
+    <!-- Texto sobre chips de color (siempre blanco para contraste) -->
+    <color name="text_on_chip">#FFFFFF</color>
+
+    <!-- ================================================================
+         BORDES Y DIVISORES
+    ================================================================ -->
+    <color name="border_subtle">#1E2333</color>
+    <color name="ripple_color">#1AF59E0B</color>
+
+    <!-- ================================================================
+         COLORES DE SISTEMA (requeridos por Material 3)
+    ================================================================ -->
+    <color name="colorPrimary">#F59E0B</color>
+    <color name="colorPrimaryVariant">#B45309</color>
+    <color name="colorOnPrimary">#0F1117</color>
+    <color name="colorSecondary">#22D3EE</color>
+    <color name="colorOnSecondary">#0F1117</color>
+    <color name="colorError">#EF4444</color>
+    <color name="colorOnError">#FFFFFF</color>
+    <color name="colorSurface">#1A1D27</color>
+    <color name="colorOnSurface">#F1F5F9</color>
+    <color name="colorBackground">#0F1117</color>
+    <color name="colorOnBackground">#F1F5F9</color>
+
 </resources>

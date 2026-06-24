@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.PaveWatchApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
+
+    <!-- Fuerza el tema oscuro de PaveWatch en modo noche -->
+    <style name="Theme.PaveWatchApp" parent="Theme.PaveWatchApp"/>
 </resources>

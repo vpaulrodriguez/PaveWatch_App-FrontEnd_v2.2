@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2D3819">
+    android:orientation="vertical"
+    android:background="#121212">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnReportar"
-        android:layout_width="267dp"
-        android:layout_height="267dp"
-        android:layout_centerInParent="true"
-        android:background="@drawable/button_style"
-        android:backgroundTint="@null"
-        android:elevation="6dp"
-        android:paddingStart="32dp"
-        android:paddingTop="32dp"
-        android:paddingEnd="32dp"
-        android:paddingBottom="32dp"
-        android:stateListAnimator="@animator/button_press"
-        android:text="REPORTAR BACHE MANUALMENTE"
-        android:lineSpacingExtra="10dp"
-        android:lineSpacingMultiplier="1.2"
-        android:textColor="#FFFFFF"
-        android:textSize="25dp"
-        android:textStyle="bold" />
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1A1A1A"
+        app:tabTextColor="#888888"
+        app:tabSelectedTextColor="#00FF66"
+        app:tabIndicatorColor="#00FF66"
+        app:tabMode="fixed"
+        app:tabGravity="fill"/>
 
-</RelativeLayout>
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

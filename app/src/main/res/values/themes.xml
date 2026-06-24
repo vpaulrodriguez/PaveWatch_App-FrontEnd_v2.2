@@ -1,9 +1,78 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.PaveWatchApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    themes.xml (res/values/themes.xml)
+    Tema Material 3 oscuro para PaveWatch App.
+    Hereda de Theme.Material3.Dark para soporte completo de componentes MD3.
+-->
+<resources>
+
+    <!--
+        Tema base de la aplicación.
+        Fuerza el modo oscuro independientemente de la preferencia del sistema
+        para garantizar la coherencia visual de la paleta vial.
+    -->
+    <style name="Theme.PaveWatchApp" parent="Theme.Material3.Dark.NoActionBar">
+
+        <!-- Colores del sistema Material 3 -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="colorPrimaryContainer">@color/accent_amber_dim</item>
+        <item name="colorOnPrimaryContainer">@color/accent_amber</item>
+
+        <item name="colorSecondary">@color/colorSecondary</item>
+        <item name="colorOnSecondary">@color/colorOnSecondary</item>
+        <item name="colorSecondaryContainer">@color/accent_cyan_dim</item>
+        <item name="colorOnSecondaryContainer">@color/accent_cyan</item>
+
+        <item name="colorError">@color/colorError</item>
+        <item name="colorOnError">@color/colorOnError</item>
+
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        <item name="colorSurfaceVariant">@color/surface_interactive</item>
+
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorOnBackground">@color/colorOnBackground</item>
+
+        <!-- Fuente base de la app: Inter (definida en res/font/) -->
+        <item name="android:fontFamily">@font/inter</item>
+
+        <!-- Sin barra de status opaca: usa el fondo de la app -->
+        <item name="android:statusBarColor">@color/surface_dark</item>
+        <item name="android:navigationBarColor">@color/surface_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+
     </style>
 
-    <style name="Theme.PaveWatchApp" parent="Base.Theme.PaveWatchApp" />
+    <!--
+        Estilo de MaterialCardView para tarjetas de baches.
+        Aplicado con style="@style/CardBache" en item_bache.xml.
+    -->
+    <style name="CardBache" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/surface_elevated</item>
+        <item name="cardCornerRadius">14dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/border_subtle</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!--
+        Estilo del TabLayout: pestañas superiores con indicador ámbar.
+    -->
+    <style name="PaveWatchTabLayout" parent="Widget.Material3.TabLayout">
+        <item name="tabIndicatorColor">@color/accent_amber</item>
+        <item name="tabSelectedTextColor">@color/accent_amber</item>
+        <item name="tabTextColor">@color/text_tertiary</item>
+        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+        <item name="tabBackground">@android:color/transparent</item>
+        <item name="tabIndicatorHeight">2dp</item>
+        <item name="android:background">@color/surface_dark</item>
+    </style>
+
+    <style name="TabTextAppearance" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
 </resources>

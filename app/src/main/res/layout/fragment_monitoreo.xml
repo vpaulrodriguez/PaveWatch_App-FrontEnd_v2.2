@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    fragment_monitoreo.xml
+    Consola de control en tiempo real de PaveWatch App.
+    Layout: ScrollView vertical con 4 zonas apiladas:
+      1. Tarjetas de estado (GPS + MQTT)
+      2. Panel de telemetría (gráfica de sensores placeholder)
+      3. Switch de detección automática
+      4. Botón rojo de pánico (reporte manual)
+-->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_dark"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="32dp">
+
+        <!-- ============================================================
+             ZONA 1: TARJETAS DE ESTADO — GPS y MQTT en paralelo
+             Dos tarjetas lado a lado que muestran el estado
+             de conectividad de los dos sistemas críticos.
+        ============================================================ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <!-- Tarjeta GPS -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="@color/surface_elevated"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/border_subtle"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <!-- Fila superior: ícono + label -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_history"
+                            app:tint="@color/accent_cyan"
+                            android:contentDescription="GPS"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="GPS"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="10sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.1" />
+
+                    </LinearLayout>
+
+                    <!-- Indicador de estado GPS -->
+                    <TextView
+                        android:id="@+id/tvGpsEstado"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Buscando..."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="4dp"
+                        tools:text="Conectado" />
+
+                    <!-- Coordenadas GPS -->
+                    <TextView
+                        android:id="@+id/tvCoordenadas"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif"
+                        android:maxLines="2"
+                        tools:text="-12.046° -77.042°" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Tarjeta MQTT -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                app:cardBackgroundColor="@color/surface_elevated"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/border_subtle"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <!-- Fila superior: ícono + label -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp">
+
+                        <!-- Dot de estado animable (color cambia por código) -->
+                        <View
+                            android:id="@+id/viewMqttDot"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_icon_circle"
+                            android:backgroundTint="@color/text_tertiary"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MQTT"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="10sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.1" />
+
+                    </LinearLayout>
+
+                    <!-- Estado de conexión MQTT -->
+                    <TextView
+                        android:id="@+id/tvMqttEstado"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Desconectado"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="4dp"
+                        tools:text="HiveMQ SSL" />
+
+                    <!-- Broker URL -->
+                    <TextView
+                        android:id="@+id/tvBrokerUrl"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        tools:text="broker.hivemq.com" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <!-- ============================================================
+             ZONA 2: PANEL DE TELEMETRÍA
+             Tarjeta que aloja la gráfica de sensores en tiempo real.
+             El contenedor 'layoutGrafica' es donde se añade la vista
+             de gráfica por código (ej. MPAndroidChart).
+        ============================================================ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/surface_elevated"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/border_subtle"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <!-- Encabezado del panel -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_pothole"
+                        app:tint="@color/accent_amber"
+                        android:contentDescription="Telemetría"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Telemetría de Sensores"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <!-- Chip de estado del sensor -->
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSensorEstado"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="En espera"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_secondary"
+                        app:chipBackgroundColor="@color/surface_interactive"
+                        app:chipCornerRadius="6dp"
+                        app:chipMinHeight="24dp"
+                        app:chipStartPadding="8dp"
+                        app:chipEndPadding="8dp"
+                        app:ensureMinTouchTargetSize="false"
+                        tools:ignore="TouchTargetSizeCheck" />
+
+                </LinearLayout>
+
+                <!-- Contenedor de la gráfica dinámica -->
+                <!-- Por código: añade tu vista de MPAndroidChart aquí -->
+                <FrameLayout
+                    android:id="@+id/layoutGrafica"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:background="@color/surface_dark"
+                    android:backgroundTint="#80000000">
+
+                    <!-- Placeholder visible cuando no hay gráfica cargada -->
+                    <LinearLayout
+                        android:id="@+id/layoutGraficaPlaceholder"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_road_empty"
+                            app:tint="@color/border_subtle"
+                            android:contentDescription="Sin datos"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Activa la detección para ver datos"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="11sp"
+                            android:fontFamily="sans-serif" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+                <!-- Fila de métricas bajo la gráfica -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <!-- Métrica: Acelerómetro Z -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvAcelZ"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.00"
+                            android:textColor="@color/accent_amber"
+                            android:textSize="18sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ACEL Z (m/s²)"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="9sp"
+                            android:fontFamily="sans-serif"
+                            android:letterSpacing="0.08"
+                            android:textAllCaps="true" />
+
+                    </LinearLayout>
+
+                    <!-- Divisor vertical -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="32dp"
+                        android:background="@color/border_subtle"
+                        android:layout_gravity="center_vertical" />
+
+                    <!-- Métrica: Giroscopio -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvGiroY"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.00"
+                            android:textColor="@color/accent_cyan"
+                            android:textSize="18sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="GIRO Y (°/s)"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="9sp"
+                            android:fontFamily="sans-serif"
+                            android:letterSpacing="0.08"
+                            android:textAllCaps="true" />
+
+                    </LinearLayout>
+
+                    <!-- Divisor vertical -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="32dp"
+                        android:background="@color/border_subtle"
+                        android:layout_gravity="center_vertical" />
+
+                    <!-- Métrica: Baches detectados en sesión -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvContadorBaches"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="18sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DETECTADOS"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="9sp"
+                            android:fontFamily="sans-serif"
+                            android:letterSpacing="0.08"
+                            android:textAllCaps="true" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============================================================
+             ZONA 3: CONTROL DE DETECCIÓN AUTOMÁTICA
+             Tarjeta con el SwitchCompat (ID: switch1) que activa/desactiva
+             la lectura del acelerómetro y giroscopio en background.
+        ============================================================ -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/surface_elevated"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/border_subtle"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <!-- Ícono + textos descriptivos del switch -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Detección automática"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginBottom="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monitorea el acelerómetro y giroscopio en tiempo real para detectar baches mientras conduces."
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif"
+                        android:lineSpacingExtra="2dp" />
+
+                </LinearLayout>
+
+                <!--
+                    SwitchCompat con ID 'switch1'.
+                    ESTE ID ES EL QUE RESUELVE el error en MonitoreoFragment.kt
+                -->
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    app:thumbTint="@color/accent_amber"
+                    app:trackTint="@color/accent_amber_dim" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ============================================================
+             ZONA 4: BOTÓN DE PÁNICO (REPORTE MANUAL)
+             Botón rojo prominente en la parte inferior.
+             ID 'btnReportar' — resuelve el segundo error de compilación.
+             Diseño: ancho completo, alto generoso, texto claro de acción.
+        ============================================================ -->
+
+        <!-- Label sobre el botón -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="REPORTE RÁPIDO"
+            android:textColor="@color/text_tertiary"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.12"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="4dp" />
+
+        <!--
+            Botón principal de reporte manual.
+            ID 'btnReportar' — ESTE ID ES EL QUE RESUELVE el primer error.
+        -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReportar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="⚠  Reportar Bache Ahora"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="#FFFFFF"
+            android:letterSpacing="0.02"
+            app:backgroundTint="#C0392B"
+            app:cornerRadius="16dp"
+            app:rippleColor="#40FFFFFF"
+            app:elevation="0dp"
+            app:icon="@null" />
+
+        <!-- Subtexto bajo el botón -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="El reporte se enviará con tus coordenadas GPS actuales vía MQTT."
+            android:textColor="@color/text_tertiary"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
+</ScrollView>

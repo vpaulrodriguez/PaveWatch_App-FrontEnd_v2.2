@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    fragment_historial.xml
+    Layout principal de la pestaña "Historial".
+    Usa un FrameLayout raíz para poder superponer la vista vacía
+    sobre el RecyclerView sin necesidad de lógica extra en XML.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_dark"
+    tools:context=".HistorialFragment">
+
+    <!-- ================================================================
+         ENCABEZADO DE SECCIÓN
+         Barra superior con título y contador de registros.
+    ================================================================ -->
+    <LinearLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Ícono de historial -->
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_history"
+            android:contentDescription="Historial de reportes"
+            app:tint="@color/accent_amber"
+            android:layout_marginEnd="10dp" />
+
+        <!-- Título de la sección -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reportes de la Sesión"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:fontFamily="@font/inter"
+            android:letterSpacing="0.02" />
+
+        <!-- Chip pequeño con total de registros (poblado por código) -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipContador"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@color/text_primary"
+            android:textSize="11sp"
+            android:fontFamily="@font/inter"
+            app:chipBackgroundColor="@color/surface_elevated"
+            app:chipStrokeColor="@color/border_subtle"
+            app:chipStrokeWidth="1dp"
+            android:minHeight="28dp"
+            tools:ignore="TouchTargetSizeCheck" />
+
+    </LinearLayout>
+
+    <!-- Divisor sutil bajo el encabezado -->
+    <View
+        android:id="@+id/dividerHeader"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/border_subtle"
+        app:layout_constraintTop_toBottomOf="@id/layoutHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ================================================================
+         LISTA PRINCIPAL
+         RecyclerView que muestra cada bache como una tarjeta.
+         Visible únicamente cuando la lista tiene al menos un elemento.
+    ================================================================ -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewHistorial"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:paddingHorizontal="16dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/dividerHeader"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_bache"
+        tools:itemCount="4"
+        tools:visibility="visible" />
+
+    <!-- ================================================================
+         ESTADO VACÍO
+         Se muestra cuando no hay baches registrados en la sesión actual.
+         Centrado y con ilustración + mensaje descriptivo.
+    ================================================================ -->
+    <LinearLayout
+        android:id="@+id/layoutVacio"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingHorizontal="40dp"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/dividerHeader"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Ícono ilustrativo de estado vacío -->
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_road_empty"
+            android:contentDescription="Sin registros"
+            app:tint="@color/text_tertiary"
+            android:alpha="0.5"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Mensaje principal del estado vacío -->
+        <TextView
+            android:id="@+id/tvHistorialVacio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sin baches registrados"
+            android:textColor="@color/text_secondary"
+            android:textSize="17sp"
+            android:fontFamily="@font/inter"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Subtexto explicativo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Los eventos detectados por el acelerómetro\no reportados manualmente aparecerán aquí."
+            android:textColor="@color/text_tertiary"
+            android:textSize="13sp"
+            android:fontFamily="@font/inter"
+            android:gravity="center"
+            android:lineSpacingExtra="3dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

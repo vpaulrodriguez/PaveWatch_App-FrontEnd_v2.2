@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    item_bache.xml
+    Tarjeta reutilizable que representa cada evento de bache en el historial.
+    Diseñada para ser scannable en modo oscuro: jerarquía visual clara con
+    tipo en negrita, hora secundaria y chip de estado con color semántico.
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardBache"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="0dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="@color/surface_elevated"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/border_subtle"
+    app:strokeWidth="1dp"
+    app:rippleColor="@color/ripple_color">
+
+    <!-- ================================================================
+         CONTENEDOR INTERNO
+         Padding interno consistente. LinearLayout horizontal principal
+         divide la info del bache (izquierda) del estado (derecha).
+    ================================================================ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp"
+        android:gravity="center_vertical">
+
+        <!-- ============================================================
+             ÍCONO DE TIPO
+             Color del ícono varía según tipo (automático vs. manual).
+             Se actualiza desde el adaptador si se desea extender.
+        ============================================================ -->
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="14dp">
+
+            <!-- Fondo circular del ícono -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_icon_circle"
+                android:backgroundTint="@color/accent_amber_dim" />
+
+            <ImageView
+                android:id="@+id/ivTipoIcono"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_pothole"
+                android:contentDescription="Tipo de reporte"
+                app:tint="@color/accent_amber" />
+        </FrameLayout>
+
+        <!-- ============================================================
+             BLOQUE CENTRAL: Tipo + Hora
+             El tipo es el dato más importante (texto bold, tamaño mayor).
+             La hora actúa como metadato secundario debajo.
+        ============================================================ -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Tipo de evento: "Automático - Acelerómetro" / "Manual" -->
+            <TextView
+                android:id="@+id/tvTipo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:fontFamily="@font/inter"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Automático - Acelerómetro" />
+
+            <!-- Etiqueta descriptiva fija (sublabel) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tipo de reporte"
+                android:textColor="@color/text_tertiary"
+                android:textSize="10sp"
+                android:fontFamily="@font/inter"
+                android:letterSpacing="0.05"
+                android:textAllCaps="true"
+                android:layout_marginTop="1dp" />
+
+            <!-- Divider interno sutil -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border_subtle"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="6dp" />
+
+            <!-- Fila inferior: ícono reloj + hora de detección -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_clock"
+                    android:contentDescription="Hora"
+                    app:tint="@color/text_tertiary"
+                    android:layout_marginEnd="5dp" />
+
+                <!-- Hora de detección del evento -->
+                <TextView
+                    android:id="@+id/tvHora"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/inter"
+                    tools:text="14:32:07" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============================================================
+             CHIP DE ESTADO MQTT
+             Posicionado a la derecha. Su color de fondo cambia según
+             si el envío fue exitoso, está pendiente, o falló.
+             El BacheAdapter.onBindViewHolder() setea el color dinámico.
+        ============================================================ -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipEstado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textSize="10sp"
+            android:fontFamily="@font/inter"
+            android:textColor="@color/text_on_chip"
+            android:minHeight="0dp"
+            app:chipMinHeight="28dp"
+            app:chipCornerRadius="8dp"
+            app:chipStartPadding="10dp"
+            app:chipEndPadding="10dp"
+            app:chipIconVisible="false"
+            app:ensureMinTouchTargetSize="false"
+            tools:text="Enviado a MQTT"
+            tools:chipBackgroundColor="@color/status_sent" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
