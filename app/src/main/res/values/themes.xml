@@ -11,7 +11,7 @@
         Fuerza el modo oscuro independientemente de la preferencia del sistema
         para garantizar la coherencia visual de la paleta vial.
     -->
-    <style name="Theme.PaveWatchApp" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="Theme.PaveWatchApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <!-- Colores del sistema Material 3 -->
         <item name="colorPrimary">@color/colorPrimary</item>

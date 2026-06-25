@@ -3,5 +3,5 @@
     </style>
 
     <!-- Fuerza el tema oscuro de PaveWatch en modo noche -->
-    <style name="Theme.PaveWatchApp" parent="Theme.PaveWatchApp"/>
+    <style name="Theme.PaveWatchApp" parent="Theme.MaterialComponents.DayNight.NoActionBar"/>
 </resources>
