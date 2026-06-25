@@ -482,7 +482,7 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
                         ", \"severidad\": " + severidadReal + ", \"tipo_evento\": \"" + tipoEvento +
                         "\", \"dispositivo\": \"app_" + origen + "\"}";
 
-                MqttMessage message = new MqttMessage(payload.getBytes());git
+                MqttMessage message = new MqttMessage(payload.getBytes());
                 message.setQos(1);
                 mqttClient.publish(MQTT_TOPIC, message);
                 mqttClient.disconnect();
