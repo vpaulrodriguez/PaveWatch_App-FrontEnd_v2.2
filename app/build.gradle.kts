@@ -58,6 +58,11 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     // Fragment KTX
     implementation("androidx.fragment:fragment-ktx:1.8.1")
+
+    // Google Maps & Location
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
     // Libreria MQTT de Eclipse Paho
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")

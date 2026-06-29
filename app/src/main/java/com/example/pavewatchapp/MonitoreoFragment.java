@@ -76,6 +76,10 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
     private boolean esPavimentado = true;
     private float ruidoMotorActual = 0f;
 
+    // --- OPTIMIZACIÓN DE UI (Eliminar Lag) ---
+    private long lastUiUpdateTime = 0L;
+    private static final long UI_UPDATE_INTERVAL_MS = 100L; // Actualizar 10 veces por segundo (10Hz)
+
     // ================================================================
     // ALGORITMO 3: MÁQUINA DE ESTADOS DE VELOCIDAD (Efecto Esquina)
     // ================================================================
@@ -263,7 +267,11 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
                 analizarTerrenoYVibracion();
             }
 
-            actualizarGraficaUI();
+            // OPTIMIZACIÓN: Solo actualizar la UI cada 100ms para evitar lag
+            if (tiempoActual - lastUiUpdateTime > UI_UPDATE_INTERVAL_MS) {
+                actualizarGraficaUI();
+                lastUiUpdateTime = tiempoActual;
+            }
 
             // BLOQUEO DE SEGURIDAD: Solo analizamos si estamos conduciendo y en vía pavimentada
 
@@ -346,7 +354,7 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
                 Toast.makeText(requireContext(), tituloUI + " detectado", Toast.LENGTH_SHORT).show();
-                bacheViewModel.agregarBache(new Bache(tituloUI, hora, "Enviado a MQTT"));
+                bacheViewModel.agregarBache(new Bache(tituloUI, hora, "Enviado a MQTT", latitudActual, longitudActual));
             });
         }
         enviarMqtt(fuerza, "AUTOMATICO", tipoMqtt);
@@ -429,6 +437,14 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
     private void configurarListeners() {
         switchAuto.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
+                // VERIFICACIÓN DE PERMISOS ANTES DE ACTIVAR
+                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(requireContext(), "Se requiere permiso de ubicación para detectar baches", Toast.LENGTH_LONG).show();
+                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISO_LOCATION_CODE);
+                    switchAuto.setChecked(false); // Desactivar hasta que dé permiso
+                    return;
+                }
+
                 activarSensores();
                 actualizarChipEstado("Activo", "#065F46");
                 switchAuto.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#F59E0B")));
@@ -442,7 +458,7 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
 
         btnReportar.setOnClickListener(v -> {
             String hora = obtenerHoraActual();
-            bacheViewModel.agregarBache(new Bache("Manual – Botón de Pánico", hora, "En espera..."));
+            bacheViewModel.agregarBache(new Bache("Manual – Botón de Pánico", hora, "En espera...", latitudActual, longitudActual));
             Toast.makeText(requireContext(), "Enviando bache manual...", Toast.LENGTH_SHORT).show();
             enviarMqtt(9.5f, "MANUAL", "BACHE");
         });
@@ -455,8 +471,8 @@ public class MonitoreoFragment extends Fragment implements SensorEventListener, 
     }
 
     private void activarSensores() {
-        if (acelerometro != null) sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_GAME);
-        if (giroscopio != null) sensorManager.registerListener(this, giroscopio, SensorManager.SENSOR_DELAY_GAME);
+        if (acelerometro != null) sensorManager.registerListener(this, acelerometro, SensorManager.SENSOR_DELAY_NORMAL);
+        if (giroscopio != null) sensorManager.registerListener(this, giroscopio, SensorManager.SENSOR_DELAY_NORMAL);
         layoutPlaceholder.setVisibility(View.GONE);
     }
 

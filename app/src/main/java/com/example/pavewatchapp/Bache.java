@@ -13,29 +13,57 @@ public class Bache {
     private final String tipo;
     private final String hora;
     private final String estado;
+    private final double latitud;
+    private final double longitud;
 
     // ── Constructor ────────────────────────────────────────────────
     /**
-     * @param tipo   Origen del reporte ("Automático – Acelerómetro", "Manual", etc.)
-     * @param hora   Timestamp en formato HH:mm:ss
-     * @param estado Estado del envío MQTT ("Enviado a MQTT", "En espera", "Error")
+     * @param tipo      Origen del reporte ("Automático – Acelerómetro", "Manual", etc.)
+     * @param hora      Timestamp en formato HH:mm:ss
+     * @param estado    Estado del envío MQTT ("Enviado a MQTT", "En espera", "Error")
+     * @param latitud   Latitud de la ubicación del evento
+     * @param longitud  Longitud de la ubicación del evento
      */
-    public Bache(String tipo, String hora, String estado) {
-        this.tipo   = tipo;
-        this.hora   = hora;
+    public Bache(String tipo, String hora, String estado, double latitud, double longitud) {
+        this.tipo = tipo;
+        this.hora = hora;
         this.estado = estado;
+        this.latitud = latitud;
+        this.longitud = longitud;
     }
 
     // ── Getters públicos ───────────────────────────────────────────
-    public String getTipo()   { return tipo;   }
-    public String getHora()   { return hora;   }
-    public String getEstado() { return estado; }
+    public String getTipo() {
+        return tipo;
+    }
+
+    public String getHora() {
+        return hora;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public double getLatitud() {
+        return latitud;
+    }
+
+    public double getLongitud() {
+        return longitud;
+    }
 
     /**
      * Representación textual del objeto para depuración.
      */
     @Override
     public String toString() {
-        return "Bache{tipo='" + tipo + "', hora='" + hora + "', estado='" + estado + "'}";
+        return "Bache{" +
+                "tipo='" + tipo + '\'' +
+                ", hora='" + hora + '\'' +
+                ", estado='" + estado + '\'' +
+                ", latitud=" + latitud +
+                ", longitud=" + longitud +
+                '}';
     }
 }

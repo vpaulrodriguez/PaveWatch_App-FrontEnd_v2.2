@@ -19,7 +19,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 public class MainActivity extends AppCompatActivity {
 
     // Nombres de las pestañas mostrados en el TabLayout
-    private static final String[] TAB_TITLES = {"MONITOREO", "HISTORIAL"};
+    private static final String[] TAB_TITLES = {"MONITOREO", "HISTORIAL", "MAPA"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
