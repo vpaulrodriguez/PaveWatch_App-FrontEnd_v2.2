@@ -19,7 +19,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 public class MainActivity extends AppCompatActivity {
 
     // Nombres de las pestañas mostrados en el TabLayout
-    private static final String[] TAB_TITLES = {"MONITOREO", "HISTORIAL", "MAPA"};
+    private static final String[] TAB_TITLES = {"HISTORIAL", "MAPA", "MONITOREO"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
         ViewPagerAdapter adapter    = new ViewPagerAdapter(this);
 
         viewPager2.setAdapter(adapter);
+
+        // para empezar en mapa
+        viewPager2.setCurrentItem(1, false);
 
         // Sincroniza los títulos de las pestañas con el deslizamiento del ViewPager2
         new TabLayoutMediator(tabLayout, viewPager2,

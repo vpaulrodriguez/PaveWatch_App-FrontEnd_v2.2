@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496997675648",
+    "project_id": "pavewatchapp",
+    "storage_bucket": "pavewatchapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496997675648:android:2fcaf7aa97b6ca3c11ac65",
+        "android_client_info": {
+          "package_name": "com.example.pavewatchapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWLpnAZrf-3NV2flUTIxNuT1RfzoXLaDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

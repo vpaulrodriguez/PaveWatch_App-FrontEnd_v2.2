@@ -18,9 +18,9 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     private static final int NUM_TABS = 3;
 
     // Índices de cada pestaña — constantes para evitar "números mágicos"
-    public static final int TAB_MONITOREO = 0;
-    public static final int TAB_HISTORIAL  = 1;
-    public static final int TAB_MAPA       = 2;
+    public static final int TAB_HISTORIAL = 0;
+    public static final int TAB_MAPA = 1;
+    public static final int TAB_MONITOREO = 2;
 
     public ViewPagerAdapter(@NonNull FragmentActivity activity) {
         super(activity);
