@@ -246,20 +246,39 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
+
+        // Ocultar los dos iconos de abajo a la derecha (Map Toolbar)
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+
+        // Mostrar el botón nativo de "Mi ubicación" (Círculo azul arriba a la derecha)
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+        // Opcional: Ocultar los botones de Zoom (+ y -) si quieres el mapa más limpio
+        // mMap.getUiSettings().setZoomControlsEnabled(false);
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+            mMap.setMyLocationEnabled(true); // Esto dibuja tu punto azul en el mapa
         }
+
         bacheViewModel.getListaBaches().observe(getViewLifecycleOwner(), this::actualizarMarcadores);
+
+        // Coordenadas por defecto (puedes cambiar esto luego para que inicie en la ubicación actual del usuario)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-12.046374, -77.042793), 14));
     }
 
     private void actualizarMarcadores(List<Bache> baches) {
         if (mMap == null) return;
+
+        // Limpiamos el mapa por si acaso
         mMap.clear();
+
+        // ✨ 3. Quitamos el código que dibujaba los pines rojos.
+        // Lo dejamos comentado por si en el futuro decides mostrar otro tipo de icono.
+        /*
         for (Bache bache : baches) {
             LatLng pos = new LatLng(bache.getLatitud(), bache.getLongitud());
             mMap.addMarker(new MarkerOptions().position(pos).title(bache.getTipo()));
         }
+        */
     }
 }
