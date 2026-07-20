@@ -48,6 +48,7 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
     private boolean esPavimentado = true;
     private float ruidoMotorActual = 0f;
 
+    // 4.16 m/s equivalen exactamente a 15 km/h
     private static final float VELOCIDAD_MINIMA_MPS = 4.16f;
     private static final long TIEMPO_GRACIA_ESQUINA_MS = 20000L;
     private int estadoConduccion = 0;
@@ -77,7 +78,6 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // 1. Notificación persistente
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
@@ -89,8 +89,6 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
                 .build();
 
         startForeground(1, notificacion);
-
-        // 2. Activar Sensores y GPS
         activarSensoresYGPS();
 
         return START_STICKY;
@@ -112,7 +110,6 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
             boolean gpsHabilitado = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             boolean redHabilitada = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            // Optimización: Cada 3 segundos en lugar de 1
             if (gpsHabilitado) locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000L, 2f, this);
             if (redHabilitada) locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000L, 2f, this);
         }
@@ -143,14 +140,16 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
         long tiempoActual = System.currentTimeMillis();
 
         if (velocidadActualMps >= VELOCIDAD_MINIMA_MPS) {
-            estadoConduccion = 1;
+            estadoConduccion = 1; // En movimiento a más de 15 km/h
             tiempoUltimaAltaVelocidad = tiempoActual;
         } else if (estadoConduccion == 1 || estadoConduccion == 2) {
-            if (tiempoActual - tiempoUltimaAltaVelocidad <= TIEMPO_GRACIA_ESQUINA_MS) estadoConduccion = 2;
-            else estadoConduccion = 0;
+            if (tiempoActual - tiempoUltimaAltaVelocidad <= TIEMPO_GRACIA_ESQUINA_MS) {
+                estadoConduccion = 2; // Detenido temporalmente en esquina o semáforo
+            } else {
+                estadoConduccion = 0; // Detenido totalmente o caminando
+            }
         }
 
-        // Transmitir datos de GPS a la UI (Si está abierta)
         Intent intent = new Intent("UPDATE_GPS");
         intent.putExtra("lat", latitudActual);
         intent.putExtra("lon", longitudActual);
@@ -184,29 +183,43 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
             float umbralDinamicoActual = UMBRAL_BACHE_BASE + (ruidoMotorActual * 1.5f);
             float fuerzaZ = Math.abs(netZ);
 
-            if (fuerzaZ > umbralDinamicoActual && (tiempoActual - ultimoEventoDetectadoTiempo > COOLDOWN_REDUNDANCIA_MS)) {
-                ultimoEventoDetectadoTiempo = tiempoActual;
-                estadoEvasion = 0;
-                registrarEvento(fuerzaZ, "Automático – Bache", "BACHE");
-            }
+            // ---> REGLA 1: VALIDACIÓN DE VELOCIDAD (Adiós a detectar baches mientras caminas) <---
+            // Solo evaluamos impactos si el carro está o estuvo recientemente a más de 15 km/h
+            if (estadoConduccion != 0) {
 
-            if (estadoEvasion == 1 && (tiempoActual - tiempoPrimerVolantazo > TIEMPO_MAX_RETORNO_MS)) {
-                estadoEvasion = 0;
-            }
+                // ---> REGLA 2: FIRMA DE ONDA (Adiós a los falsos positivos por Rompemuelles/Gibas) <---
+                // En lugar de usar solo Math.abs(netZ), verificamos el comportamiento en el buffer.
+                if (fuerzaZ > umbralDinamicoActual && (tiempoActual - ultimoEventoDetectadoTiempo > COOLDOWN_REDUNDANCIA_MS)) {
 
-            if (Math.abs(netX) > UMBRAL_EVASION) {
-                if (estadoEvasion == 0) {
-                    estadoEvasion = 1;
-                    tiempoPrimerVolantazo = tiempoActual;
-                    direccionPrimerVolantazo = Math.signum(netX);
-                } else if (estadoEvasion == 1) {
-                    if (Math.signum(netX) == -direccionPrimerVolantazo) {
-                        if (tiempoActual - ultimoEventoDetectadoTiempo > COOLDOWN_REDUNDANCIA_MS) {
-                            ultimoEventoDetectadoTiempo = tiempoActual;
-                            float fuerzaEvasion = Math.abs(netX);
-                            registrarEvento(fuerzaEvasion, "Automático – Esquive", "EVASION");
-                        }
+                    if (esFirmaDeBacheReal()) {
+                        ultimoEventoDetectadoTiempo = tiempoActual;
                         estadoEvasion = 0;
+                        registrarEvento(fuerzaZ, "Automático – Bache", "BACHE");
+                    } else {
+                        // Fue un impacto fuerte hacia arriba (giba/rompemuelles), se ignora.
+                        System.out.println("⚠️ Elevación o rompemuelles ignorado por análisis de onda.");
+                    }
+                }
+
+                // Validación de esquive brusco de baches (Volantazo)
+                if (estadoEvasion == 1 && (tiempoActual - tiempoPrimerVolantazo > TIEMPO_MAX_RETORNO_MS)) {
+                    estadoEvasion = 0;
+                }
+
+                if (Math.abs(netX) > UMBRAL_EVASION) {
+                    if (estadoEvasion == 0) {
+                        estadoEvasion = 1;
+                        tiempoPrimerVolantazo = tiempoActual;
+                        direccionPrimerVolantazo = Math.signum(netX);
+                    } else if (estadoEvasion == 1) {
+                        if (Math.signum(netX) == -direccionPrimerVolantazo) {
+                            if (tiempoActual - ultimoEventoDetectadoTiempo > COOLDOWN_REDUNDANCIA_MS) {
+                                ultimoEventoDetectadoTiempo = tiempoActual;
+                                float fuerzaEvasion = Math.abs(netX);
+                                registrarEvento(fuerzaEvasion, "Automático – Esquive", "EVASION");
+                            }
+                            estadoEvasion = 0;
+                        }
                     }
                 }
             }
@@ -218,8 +231,30 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
         }
     }
 
+    /**
+     * ALGORITMO DE FIRMA DE ONDA:
+     * Un bache implica que la rueda CAE primero (-Z) y luego CHOCA al subir (+Z).
+     * Un rompemuelles implica que la rueda SUBE primero (+Z) y luego baja suavemente.
+     */
+    private boolean esFirmaDeBacheReal() {
+        if (bufferZ.size() < 10) return true; // Si el buffer está vacío, pasamos por defecto
+
+        boolean huboCaidaPrevia = false;
+        // Revisamos las últimas 15 lecturas (aprox 150-300ms de historial inmediato)
+        int limite = Math.max(0, bufferZ.size() - 15);
+
+        for (int i = bufferZ.size() - 1; i >= limite; i--) {
+            float valorZ = bufferZ.get(i);
+            // Si detectamos que el eje Z cayó por debajo de -2.0m/s^2, confirmamos el vacío del hueco
+            if (valorZ < -2.0f) {
+                huboCaidaPrevia = true;
+                break;
+            }
+        }
+        return huboCaidaPrevia;
+    }
+
     private void transmitirSensoresUI() {
-        // Transmitir datos para la gráfica (Si la UI está abierta)
         Intent intent = new Intent("UPDATE_SENSORES");
         intent.putExtra("netZ", netZ);
         intent.putExtra("giroY", giroY);
@@ -255,7 +290,6 @@ public class MonitoreoService extends Service implements SensorEventListener, Lo
             public void onError(String mensaje) {}
         });
 
-        // Transmitir evento a la UI para agregarlo al ViewModel si la app está visible
         Intent intent = new Intent("EVENTO_BACHE_DETECTADO");
         intent.putExtra("titulo", tituloUI);
         intent.putExtra("hora", hora);
