@@ -15,12 +15,14 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 public class ViewPagerAdapter extends FragmentStateAdapter {
 
     // Número total de pestañas
-    private static final int NUM_TABS = 3;
+    private static final int NUM_TABS = 4;
 
     // Índices de cada pestaña — constantes para evitar "números mágicos"
     public static final int TAB_HISTORIAL = 0;
     public static final int TAB_MAPA = 1;
     public static final int TAB_MONITOREO = 2;
+
+    public static final int TAB_ESTADISTICAS = 3;
 
     public ViewPagerAdapter(@NonNull FragmentActivity activity) {
         super(activity);
@@ -40,6 +42,8 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
                 return HistorialFragment.newInstance();
             case TAB_MAPA:
                 return MapaFragment.newInstance();
+            case TAB_ESTADISTICAS: // <--- NUEVO CASO AQUÍ
+                return new EstadisticasFragment();
             default:
                 return MonitoreoFragment.newInstance();
         }

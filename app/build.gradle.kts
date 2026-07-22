@@ -69,4 +69,11 @@ dependencies {
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+
+    // Retrofit y Gson para conectarnos al backend
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+// MPAndroidChart para la gráfica (por si no está en este repo nuevo)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

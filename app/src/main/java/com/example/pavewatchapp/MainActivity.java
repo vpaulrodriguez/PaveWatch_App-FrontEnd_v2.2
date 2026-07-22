@@ -31,7 +31,7 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity {
 
     // Nombres de las pestañas mostrados en el TabLayout
-    private static final String[] TAB_TITLES = {"HISTORIAL", "MAPA", "MONITOREO"};
+    private static final String[] TAB_TITLES = {"HISTORIAL", "MAPA", "MONITOREO", "ESTADÍSTICAS"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
