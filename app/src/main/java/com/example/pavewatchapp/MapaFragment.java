@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,20 +29,32 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+import com.google.maps.android.heatmaps.WeightedLatLng;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import Network.ApiClient;
+import Network.ApiService;
+import Network.BacheDTO;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapaFragment extends Fragment implements OnMapReadyCallback {
     private StorageReference mStorageRef;
     private GoogleMap mMap;
     private BacheViewModel bacheViewModel;
+    private TileOverlay heatmapOverlay;
 
     private Dialog dialogoReporte;
     private ImageView imgDialogFoto;
@@ -52,7 +65,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
 
     // --- 1. LANZADORES DE ACTIVIDAD ---
 
-    // Lanzador para la galería
     private final ActivityResultLauncher<String> seleccionarFotoLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
@@ -65,7 +77,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
             }
     );
 
-    // Lanzador para la cámara (Thumbnail)
     private final ActivityResultLauncher<Void> tomarFotoLauncher = registerForActivityResult(
             new ActivityResultContracts.TakePicturePreview(),
             bitmap -> {
@@ -78,7 +89,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
             }
     );
 
-    // NUEVO: Lanzador para pedir permisos de cámara en tiempo real
     private final ActivityResultLauncher<String> solicitarPermisoCamara = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
@@ -116,7 +126,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         bacheViewModel = new ViewModelProvider(requireActivity()).get(BacheViewModel.class);
     }
 
-    // --- 2. INTERFAZ Y DIÁLOGOS ---
+    // --- 2. INTERFAZ Y DIÁLOGOS (sin cambios) ---
 
     private void mostrarDialogoReporte() {
         dialogoReporte = new Dialog(requireContext());
@@ -132,9 +142,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         uriFotoSeleccionada = null;
         bitmapFotoTomada = null;
 
-        // Al tocar la imagen gris, abrimos el BottomSheet en lugar del AlertDialog viejo
         imgDialogFoto.setOnClickListener(v -> mostrarBottomSheet());
-
         btnCerrar.setOnClickListener(v -> dialogoReporte.dismiss());
 
         btnDialogSubir.setOnClickListener(v -> {
@@ -148,21 +156,18 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         dialogoReporte.show();
     }
 
-    // NUEVO: Método que despliega el menú inferior elegante
     private void mostrarBottomSheet() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet_foto, null);
         bottomSheetDialog.setContentView(view);
 
-        // Click en Cámara
         view.findViewById(R.id.btn_opcion_camara).setOnClickListener(v -> {
-            bottomSheetDialog.dismiss(); // Cierra el menú inferior
+            bottomSheetDialog.dismiss();
             verificarPermisosYAbrirCamara();
         });
 
-        // Click en Galería
         view.findViewById(R.id.btn_opcion_galeria).setOnClickListener(v -> {
-            bottomSheetDialog.dismiss(); // Cierra el menú inferior
+            bottomSheetDialog.dismiss();
             seleccionarFotoLauncher.launch("image/*");
         });
 
@@ -171,14 +176,12 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
 
     private void verificarPermisosYAbrirCamara() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            // Ya tiene permiso, abre la cámara directo
             try {
                 tomarFotoLauncher.launch(null);
             } catch (Exception e) {
                 Toast.makeText(requireContext(), "Error al abrir la cámara", Toast.LENGTH_SHORT).show();
             }
         } else {
-            // No tiene permiso, lo pedimos en pantalla
             solicitarPermisoCamara.launch(Manifest.permission.CAMERA);
         }
     }
@@ -196,7 +199,7 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    // --- 3. FIREBASE Y BACKEND ---
+    // --- 3. FIREBASE Y BACKEND (sin cambios) ---
 
     private void subirFotoAFirebase(Uri rutaUri) {
         String nombre = "baches/foto_" + System.currentTimeMillis() + ".jpg";
@@ -207,7 +210,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
 
     private void subirBitmapAFirebase(Bitmap bitmap) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        // Ojo aquí: el bitmap que devuelve este método es un "Thumbnail" (miniatura)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         String nombre = "baches/foto_" + System.currentTimeMillis() + ".jpg";
         StorageReference ref = mStorageRef.child(nombre);
@@ -220,8 +222,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
             double lat = mMap.getCameraPosition().target.latitude;
             double lon = mMap.getCameraPosition().target.longitude;
 
-            // JSON CORREGIDO: Agregamos "severidad" (0.0) y "dispositivo" ("app_FOTO")
-            // para que Jackson en Spring Boot no colapse buscando campos vacíos.
             String payload = String.format(Locale.US,
                     "{\"latitud\": %f, \"longitud\": %f, \"severidad\": 0.0, \"tipo_evento\": \"REPORTE_FOTO\", \"dispositivo\": \"app_FOTO\", \"fotoUrl\": \"%s\"}",
                     lat, lon, uri.toString());
@@ -229,7 +229,6 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
             MqttManager.getInstance().publicarMensaje(requireContext(), payload, new MqttManager.MqttCallback() {
                 @Override
                 public void onExito() {
-                    // TEXTO CAMBIADO AQUÍ
                     Toast.makeText(requireContext(), "¡Bache detectado y reportado!", Toast.LENGTH_LONG).show();
                 }
 
@@ -247,38 +246,75 @@ public class MapaFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Ocultar los dos iconos de abajo a la derecha (Map Toolbar)
         mMap.getUiSettings().setMapToolbarEnabled(false);
-
-        // Mostrar el botón nativo de "Mi ubicación" (Círculo azul arriba a la derecha)
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-        // Opcional: Ocultar los botones de Zoom (+ y -) si quieres el mapa más limpio
-        // mMap.getUiSettings().setZoomControlsEnabled(false);
-
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true); // Esto dibuja tu punto azul en el mapa
+            mMap.setMyLocationEnabled(true);
         }
 
         bacheViewModel.getListaBaches().observe(getViewLifecycleOwner(), this::actualizarMarcadores);
 
-        // Coordenadas por defecto (puedes cambiar esto luego para que inicie en la ubicación actual del usuario)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-12.046374, -77.042793), 14));
+
+        cargarMapaDeCalor();
     }
 
     private void actualizarMarcadores(List<Bache> baches) {
         if (mMap == null) return;
+        // Los pines de sesión siguen desactivados a propósito (decisión previa
+        // para no saturar el mapa); el heatmap de abajo cubre esa necesidad
+        // con datos agregados de la base de datos.
+    }
 
-        // Limpiamos el mapa por si acaso
-        mMap.clear();
+    // --- 5. MAPA DE CALOR ---
 
-        // ✨ 3. Quitamos el código que dibujaba los pines rojos.
-        // Lo dejamos comentado por si en el futuro decides mostrar otro tipo de icono.
-        /*
-        for (Bache bache : baches) {
-            LatLng pos = new LatLng(bache.getLatitud(), bache.getLongitud());
-            mMap.addMarker(new MarkerOptions().position(pos).title(bache.getTipo()));
+    private void cargarMapaDeCalor() {
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        apiService.getMapaCalor().enqueue(new Callback<List<BacheDTO>>() {
+            @Override
+            public void onResponse(Call<List<BacheDTO>> call, Response<List<BacheDTO>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    pintarMapaDeCalor(response.body());
+                } else {
+                    Log.e("MapaCalor", "Respuesta no exitosa: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<BacheDTO>> call, Throwable t) {
+                Log.e("MapaCalor", "Error al cargar mapa de calor", t);
+            }
+        });
+    }
+
+    private void pintarMapaDeCalor(List<BacheDTO> baches) {
+        if (mMap == null) return;
+
+        List<WeightedLatLng> puntos = new ArrayList<>();
+        for (BacheDTO b : baches) {
+            if (b.getLatitud() != null && b.getLongitud() != null) {
+                double peso = b.getSeveridad() != null ? b.getSeveridad() : 1.0;
+
+                // --- TRUCO MATEMÁTICO ---
+                // Elevamos la severidad al cuadrado para forzar que los baches
+                // graves aislados destaquen en color rojo.
+                peso = Math.pow(peso, 2);
+
+                puntos.add(new WeightedLatLng(new LatLng(b.getLatitud(), b.getLongitud()), peso));
+            }
         }
-        */
+        if (puntos.isEmpty()) return;
+
+        if (heatmapOverlay != null) {
+            heatmapOverlay.remove();
+        }
+
+        HeatmapTileProvider provider = new HeatmapTileProvider.Builder()
+                .weightedData(puntos)
+                .radius(40)
+                .build();
+
+        heatmapOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
     }
 }

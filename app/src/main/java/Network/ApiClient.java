@@ -5,7 +5,7 @@ public class ApiClient {
 
 
         // Pon aquí la IP o URL de tu backend
-        private static final String BASE_URL = "http://10.122.57.64:8080/";
+        private static final String BASE_URL = "https://pavewatchbackend-def.onrender.com/";
         private static Retrofit retrofit = null;
 
         public static Retrofit getClient() {

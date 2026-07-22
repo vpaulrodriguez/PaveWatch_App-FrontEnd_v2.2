@@ -76,4 +76,7 @@ dependencies {
 
 // MPAndroidChart para la gráfica (por si no está en este repo nuevo)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.google.maps.android:android-maps-utils:3.4.0")
+// (o la versión más reciente)
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
 }
